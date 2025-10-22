@@ -8,6 +8,7 @@ import gymnasium as gym
 
 from ray.rllib.core import DEFAULT_MODULE_ID
 from ray.rllib.core.columns import Columns
+from ray.rllib.core.models.specs.typing import SpecType
 from ray.rllib.core.rl_module.default_model_config import DefaultModelConfig
 from ray.rllib.models.distributions import Distribution
 from ray.rllib.utils.annotations import (
@@ -741,29 +742,29 @@ class RLModule(Checkpointable, abc.ABC):
         """
         return self
 
-    def output_specs_inference(self):
+    def output_specs_inference(self) -> SpecType:
         return [Columns.ACTION_DIST_INPUTS]
 
-    def output_specs_exploration(self):
+    def output_specs_exploration(self) -> SpecType:
         return [Columns.ACTION_DIST_INPUTS]
 
-    def output_specs_train(self):
+    def output_specs_train(self) -> SpecType:
         """Returns the output specs of the forward_train method."""
         return {}
 
-    def input_specs_inference(self):
+    def input_specs_inference(self) -> SpecType:
         """Returns the input specs of the forward_inference method."""
         return self._default_input_specs()
 
-    def input_specs_exploration(self):
+    def input_specs_exploration(self) -> SpecType:
         """Returns the input specs of the forward_exploration method."""
         return self._default_input_specs()
 
-    def input_specs_train(self):
+    def input_specs_train(self) -> SpecType:
         """Returns the input specs of the forward_train method."""
         return self._default_input_specs()
 
-    def _default_input_specs(self):
+    def _default_input_specs(self) -> SpecType:
         """Returns the default input specs."""
         return [Columns.OBS]
 
