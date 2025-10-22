@@ -42,15 +42,6 @@ namespace core {
 
 namespace worker {
 
-class MockEventAggregatorClient : public ray::rpc::EventAggregatorClient {
- public:
-  MOCK_METHOD(void,
-              AddEvents,
-              (const rpc::events::AddEventsRequest &request,
-               const rpc::ClientCallback<rpc::events::AddEventsReply> &callback),
-              (override));
-};
-
 class TaskEventTestWriteExport : public ::testing::Test {
  public:
   TaskEventTestWriteExport() {
@@ -68,8 +59,7 @@ class TaskEventTestWriteExport : public ::testing::Test {
   )");
 
     task_event_buffer_ = std::make_unique<TaskEventBufferImpl>(
-        std::make_unique<ray::gcs::MockGcsClient>(),
-        std::make_unique<MockEventAggregatorClient>());
+        std::make_unique<ray::gcs::MockGcsClient>());
   }
 
   virtual void SetUp() { RAY_CHECK_OK(task_event_buffer_->Start(/*auto_flush*/ false)); }
@@ -98,7 +88,6 @@ class TaskEventTestWriteExport : public ::testing::Test {
                                              attempt_num,
                                              rpc::TaskStatus::RUNNING,
                                              running_ts,
-                                             /*is_actor_task_event=*/false,
                                              nullptr,
                                              state_update);
   }

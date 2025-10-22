@@ -22,7 +22,6 @@ Status KillAllProcAndWait(const std::string &cgroup_folder) { return Status::OK(
 
 #include <sys/wait.h>
 
-#include <filesystem>
 #include <fstream>
 #include <string>
 #include <vector>
@@ -30,8 +29,6 @@ Status KillAllProcAndWait(const std::string &cgroup_folder) { return Status::OK(
 #include "absl/strings/numbers.h"
 #include "absl/strings/str_format.h"
 #include "ray/common/cgroup/constants.h"
-#include "ray/util/logging.h"
-#include "ray/util/path_utils.h"
 
 namespace ray {
 

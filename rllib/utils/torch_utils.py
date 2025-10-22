@@ -717,8 +717,7 @@ def set_torch_seed(seed: Optional[int] = None) -> None:
         # See https://github.com/pytorch/pytorch/issues/47672.
         cuda_version = torch.version.cuda
         if cuda_version is not None and float(torch.version.cuda) >= 10.2:
-            # See https://docs.nvidia.com/cuda/cublas/index.html#results-reproducibility.
-            os.environ["CUBLAS_WORKSPACE_CONFIG"] = ":4096:8"
+            os.environ["CUBLAS_WORKSPACE_CONFIG"] = "4096:8"
             torch.cuda.manual_seed(seed)
             torch.cuda.manual_seed_all(seed)  # if using multi-GPU
         else:

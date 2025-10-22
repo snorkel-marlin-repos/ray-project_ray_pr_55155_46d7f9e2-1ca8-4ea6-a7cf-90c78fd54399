@@ -23,7 +23,6 @@
 
 #include "ray/stats/metric_defs.h"
 #include "ray/util/logging.h"
-#include "ray/util/string_utils.h"
 
 namespace ray {
 namespace raylet {

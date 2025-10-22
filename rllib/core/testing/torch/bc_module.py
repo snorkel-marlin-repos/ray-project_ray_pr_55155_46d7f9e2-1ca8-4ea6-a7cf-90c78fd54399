@@ -5,6 +5,7 @@ from ray.rllib.core.rl_module.rl_module import RLModule
 from ray.rllib.models.torch.torch_distributions import TorchCategorical
 from ray.rllib.core.rl_module.multi_rl_module import MultiRLModule
 from ray.rllib.core.rl_module.torch.torch_rl_module import TorchRLModule
+from ray.rllib.core.models.specs.typing import SpecType
 from ray.rllib.utils.annotations import override
 from ray.rllib.utils.framework import try_import_torch
 
@@ -35,15 +36,15 @@ class DiscreteBCTorchModule(TorchRLModule):
         return TorchCategorical
 
     @override(RLModule)
-    def output_specs_exploration(self):
+    def output_specs_exploration(self) -> SpecType:
         return [Columns.ACTION_DIST_INPUTS]
 
     @override(RLModule)
-    def output_specs_inference(self):
+    def output_specs_inference(self) -> SpecType:
         return [Columns.ACTION_DIST_INPUTS]
 
     @override(RLModule)
-    def output_specs_train(self):
+    def output_specs_train(self) -> SpecType:
         return [Columns.ACTION_DIST_INPUTS]
 
     @override(RLModule)

@@ -5,6 +5,7 @@ from ray.rllib.algorithms.sac.sac_learner import QF_PREDS
 from ray.rllib.core.columns import Columns
 from ray.rllib.core.learner.utils import make_target_network
 from ray.rllib.core.models.base import Encoder, Model
+from ray.rllib.core.models.specs.typing import SpecType
 from ray.rllib.core.rl_module.apis import QNetAPI, InferenceOnlyAPI, TargetNetworkAPI
 from ray.rllib.core.rl_module.rl_module import RLModule
 from ray.rllib.utils.annotations import (
@@ -139,7 +140,7 @@ class DefaultDQNRLModule(RLModule, InferenceOnlyAPI, TargetNetworkAPI, QNetAPI):
             return {}
 
     @override(RLModule)
-    def input_specs_train(self):
+    def input_specs_train(self) -> SpecType:
         return [
             Columns.OBS,
             Columns.ACTIONS,
@@ -147,15 +148,15 @@ class DefaultDQNRLModule(RLModule, InferenceOnlyAPI, TargetNetworkAPI, QNetAPI):
         ]
 
     @override(RLModule)
-    def output_specs_exploration(self):
+    def output_specs_exploration(self) -> SpecType:
         return [Columns.ACTIONS]
 
     @override(RLModule)
-    def output_specs_inference(self):
+    def output_specs_inference(self) -> SpecType:
         return [Columns.ACTIONS]
 
     @override(RLModule)
-    def output_specs_train(self):
+    def output_specs_train(self) -> SpecType:
         return [
             QF_PREDS,
             QF_TARGET_NEXT_PREDS,

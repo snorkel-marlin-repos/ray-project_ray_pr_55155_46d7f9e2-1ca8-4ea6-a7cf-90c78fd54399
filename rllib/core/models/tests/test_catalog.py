@@ -31,17 +31,24 @@ from ray.rllib.core.models.torch.base import TorchModel
 from ray.rllib.core.rl_module.default_model_config import DefaultModelConfig
 from ray.rllib.core.rl_module.rl_module import RLModuleSpec
 from ray.rllib.models import MODEL_DEFAULTS
+from ray.rllib.models.tf.tf_distributions import (
+    TfCategorical,
+    TfDiagGaussian,
+    TfMultiCategorical,
+    TfMultiDistribution,
+)
 from ray.rllib.models.torch.torch_distributions import (
     TorchCategorical,
     TorchDiagGaussian,
     TorchMultiCategorical,
     TorchMultiDistribution,
 )
-from ray.rllib.utils.framework import try_import_torch
+from ray.rllib.utils.framework import try_import_tf, try_import_torch
 from ray.rllib.utils.numpy import convert_to_numpy
 from ray.rllib.utils.spaces.space_utils import get_dummy_batch_for_space
 from ray.rllib.utils.torch_utils import convert_to_torch_tensor
 
+_, tf, _ = try_import_tf()
 torch, _ = try_import_torch()
 
 
@@ -51,11 +58,13 @@ class TestCatalog(unittest.TestCase):
 
         Args:
             model: The model to check.
-            framework: The framework to use (torch).
+            framework: The framework to use (tf|torch).
             model_config_dict: The model config dict to use.
             input_space: The input space to use.
         """
-        convert_method = convert_to_torch_tensor
+        convert_method = (
+            tf.convert_to_tensor if framework == "tf2" else convert_to_torch_tensor
+        )
         expected_latent_dim = model_config_dict.get("latent_dim")
         if expected_latent_dim is None:
             # For CNNEncoders, `output_dims` are computed automatically.
@@ -123,7 +132,7 @@ class TestCatalog(unittest.TestCase):
             ),
         ]
 
-        frameworks = ["torch"]
+        frameworks = ["tf2", "torch"]
 
         # First check if encoders can be created for non-composite spaces
         print("Testing encoders for non-composite input spaces...")
@@ -173,12 +182,10 @@ class TestCatalog(unittest.TestCase):
             # Box
             TestConfig(
                 Box(-np.inf, np.inf, (7,), dtype=np.float32),
-                {
-                    "torch": TorchDiagGaussian,
-                },
+                {"torch": TorchDiagGaussian, "tf2": TfDiagGaussian},
             ),
             # Discrete
-            TestConfig(Discrete(5), {"torch": TorchCategorical}),
+            TestConfig(Discrete(5), {"torch": TorchCategorical, "tf2": TfCategorical}),
             # Nested Dict
             TestConfig(
                 Dict(
@@ -189,6 +196,7 @@ class TestCatalog(unittest.TestCase):
                 ),
                 {
                     "torch": TorchMultiDistribution,
+                    "tf2": TfMultiDistribution,
                 },
             ),
             # Nested Tuple
@@ -201,6 +209,7 @@ class TestCatalog(unittest.TestCase):
                 ),
                 {
                     "torch": TorchMultiDistribution,
+                    "tf2": TfMultiDistribution,
                 },
             ),
             # Tuple nested inside Dict
@@ -222,6 +231,7 @@ class TestCatalog(unittest.TestCase):
                 ),
                 {
                     "torch": TorchMultiDistribution,
+                    "tf2": TfMultiDistribution,
                 },
             ),
             # Dict nested inside Tuple
@@ -246,12 +256,13 @@ class TestCatalog(unittest.TestCase):
                 ),
                 {
                     "torch": TorchMultiDistribution,
+                    "tf2": TfMultiDistribution,
                 },
             ),
             # MultiDiscrete
             TestConfig(
                 MultiDiscrete([5, 5, 5]),
-                {"torch": TorchMultiCategorical},
+                {"torch": TorchMultiCategorical, "tf2": TfMultiCategorical},
             ),
         ]
 
@@ -273,7 +284,10 @@ class TestCatalog(unittest.TestCase):
 
             # Check if we can query the required input dimensions
             expected_cls = expected_cls_dict["torch"]
-            if expected_cls is TorchMultiDistribution:
+            if (
+                expected_cls is TorchMultiDistribution
+                or expected_cls is TfMultiDistribution
+            ):
                 # For these special cases, we need to create partials of the
                 # expected classes so that we can calculate the required inputs
                 expected_cls = _multi_action_dist_partial_helper(
@@ -281,7 +295,10 @@ class TestCatalog(unittest.TestCase):
                     action_space=action_space,
                     framework="torch",
                 )
-            elif expected_cls is TorchMultiCategorical:
+            elif (
+                expected_cls is TorchMultiCategorical
+                or expected_cls is TfMultiCategorical
+            ):
                 # For these special cases, we need to create partials of the
                 # expected classes so that we can calculate the required inputs
                 expected_cls = _multi_categorical_dist_partial_helper(

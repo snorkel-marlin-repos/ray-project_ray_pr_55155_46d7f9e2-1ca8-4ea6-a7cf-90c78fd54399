@@ -21,8 +21,6 @@
 #include <string>
 #include <vector>
 
-#include "ray/util/path_utils.h"
-
 namespace ray {
 
 namespace testing {
